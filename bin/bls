@@ -1,0 +1,63 @@
+#!/usr/bin/env node
+
+'use strict'
+
+const bls = require('../src')
+const AWS = require('aws-sdk')
+const argv = require('minimist')(process.argv.slice(2))
+const rc = require('rc')
+const { camelCase, isEmpty, assignIn } = require('lodash')
+const { loadGlobalConfig, saveGlobalConfig, loadConfig, saveConfig, log } = require('../src/common')
+const { projectNamePrompt, awsProfilePrompt, workspacePrompt, userPrompt, emailPrompt } = require('../src/prompts')
+
+const BlsCli = async() => {
+    let globalConfig = loadGlobalConfig()
+    if (isEmpty(globalConfig)) {
+        const result = await projectNamePrompt()
+        globalConfig = {
+            currentProject: result.projectName,
+            projects: [
+                result.projectName
+            ]
+        }
+        saveGlobalConfig(globalConfig)
+    }
+    let config = loadConfig()
+    if (isEmpty(config)) {
+        config = {
+            ...await awsProfilePrompt(),
+            ...await workspacePrompt(),
+            ...await userPrompt(),
+            ...await emailPrompt()
+        }
+        assignIn(config, rc('aws')[config.awsProfile] || rc('aws')[`profile ${config.awsProfile}`])
+        config.bucket = `bls-${config.user}-${config.region}`
+        saveConfig(config)
+    }
+    config.projectName = globalConfig.currentProject
+    // // Setup AWS config & credentials
+    AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: config.awsProfile })
+    process.env.AWS_PROFILE = config.awsProfile
+    process.env.NODE_ENV = config.environment === 'production' ? 'production' : config.environment
+    log.info(`Project: ${globalConfig.currentProject}`)
+    log.info(`Workspace is ${config.workspace}`, '\n\n-----------------------------------------------------------\n')
+    if (!argv._.length) {
+        argv._.push('help')
+    }
+    for (let _ of argv._) {
+        if (bls.alias[_]) {
+            _ = bls.alias[_]
+        }
+        const module = camelCase(_)
+        if (typeof bls[module] === 'function') {
+            bls[module](config, argv)
+            break
+        } else {
+            log.error(`${_} is invalid command\n`)
+            bls['help'](config, argv)
+        }
+    }
+}
+
+BlsCli()
+

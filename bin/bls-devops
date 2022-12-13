@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+
+'use strict'
+
+const bls = require('../src')
+const AWS = require('aws-sdk')
+const argv = require('minimist')(process.argv.slice(2))
+const { camelCase } = require('lodash')
+const { log } = require('../src/common')
+const awsProfile = argv.a || null
+
+// CodeBuild 使用container本身credential
+if (awsProfile) {
+    AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: awsProfile })
+    process.env.AWS_PROFILE = awsProfile
+}
+
+const config = {
+    workspace: process.env.CODEBUILD_SRC_DIR,
+    bucket: process.env.ARTIFACT_BUCKET,
+    region: process.env.AWS_REGION
+}
+
+if (!argv._.length) {
+    argv._.push('help')
+}
+for (let _ of argv._) {
+    if (bls.alias[_]) {
+        _ = bls.alias[_]
+    }
+    const command = camelCase(_)
+    if (typeof bls[command] === 'function') {
+        bls[command](config, argv)
+        break
+    } else {
+        log.error(`${_} is invalid command\n`)
+        bls['help'](config, argv)
+    }
+}
