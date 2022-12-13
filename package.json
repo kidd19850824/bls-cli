@@ -1,0 +1,46 @@
+{
+    "name": "bls-cli",
+    "version": "1.0.27",
+    "description": "",
+    "main": "",
+    "scripts": {},
+    "author": "SoftChef",
+    "license": "SoftChef",
+    "bin": {
+        "bls": "./bin/bls",
+        "bls-devops": "./bin/bls-devops"
+    },
+    "dependencies": {
+        "aws-sdk": "^2.452.0",
+        "body-parser": "^1.19.0",
+        "chalk": "^2.4.2",
+        "chinese-conv": "^1.0.1",
+        "cli-progress": "^2.1.1",
+        "express": "^4.17.1",
+        "inquirer": "^6.3.1",
+        "lodash": "^4.17.11",
+        "md5-dir": "^0.2.0",
+        "minimist": "^1.2.0",
+        "rc": "^1.2.8",
+        "request": "^2.88.0",
+        "terminal-link": "^1.3.0",
+        "untildify": "^4.0.0",
+        "yaml": "^1.6.0"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.4.5",
+        "babel-loader": "^8.0.6",
+        "chai": "^4.1.2",
+        "cross-env": "^5.2.0",
+        "eslint": "^5.16.0",
+        "eslint-config-standard": "^12.0.0",
+        "eslint-loader": "^2.1.2",
+        "eslint-plugin-import": "^2.17.2",
+        "eslint-plugin-node": "^9.0.1",
+        "eslint-plugin-promise": "^4.1.1",
+        "eslint-plugin-standard": "^4.0.0",
+        "miap-webpack": "git+ssh://git@github.com/SoftChef/miap-webpack.git#master",
+        "mocha": "^5.1.1",
+        "sinon": "^7.3.2"
+    }
+}
